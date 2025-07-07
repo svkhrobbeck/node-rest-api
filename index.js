@@ -1,14 +1,22 @@
-const http = require("http");
-const getBodyData = require("./util");
-const { v4 } = require("uuid");
+require("dotenv").config();
+
 const fs = require("fs");
 const path = require("path");
+const http = require("http");
+const { v4 } = require("uuid");
+const { StatusCodes } = require("http-status-codes");
 
-const errorRes = { status: 404, statusText: "NOT FOUND", error: "No such book exists!" };
+const getBodyData = require("./util");
+
+const errorRes = {
+  status: StatusCodes.NOT_FOUND,
+  statusText: "NOT FOUND",
+  error: "No such book exists!",
+};
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(async (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+  res.writeHead(StatusCodes.OK, { "Content-Type": "application/json; charset=utf-8" });
 
   // get all books (GET)
   if (req.url === "/api/books" && req.method === "GET") {
@@ -16,7 +24,7 @@ const server = http.createServer(async (req, res) => {
       if (err) throw err;
 
       const books = JSON.parse(content);
-      const resp = { status: 200, statusText: "OK", books };
+      const resp = { status: StatusCodes.OK, statusText: "OK", books };
       res.end(JSON.stringify(resp));
     });
   }
@@ -33,7 +41,7 @@ const server = http.createServer(async (req, res) => {
       const newBook = { title, pages, author, id: v4() };
       books.push(newBook);
 
-      const resp = { status: 200, statusText: "CREATED", book: newBook };
+      const resp = { status: StatusCodes.CREATED, statusText: "CREATED", book: newBook };
       res.end(JSON.stringify(resp));
 
       fs.writeFile(path.join(__dirname, "data", "db.json"), JSON.stringify(books), err => {
@@ -52,7 +60,7 @@ const server = http.createServer(async (req, res) => {
       const book = books.find(b => b.id === id);
 
       if (!book) return res.end(JSON.stringify(errorRes));
-      const resp = { status: 200, statusText: "OK", book };
+      const resp = { status: StatusCodes.OK, statusText: "OK", book };
 
       res.end(JSON.stringify(resp));
     });
@@ -79,7 +87,7 @@ const server = http.createServer(async (req, res) => {
       };
       books[idx] = updatedBook;
 
-      const resp = { status: 200, statusText: "UPDATED", book: updatedBook };
+      const resp = { status: StatusCodes.OK, statusText: "UPDATED", book: updatedBook };
       res.end(JSON.stringify(resp));
 
       fs.writeFile(path.join(__dirname, "data", "db.json"), JSON.stringify(books), err => {
@@ -100,7 +108,7 @@ const server = http.createServer(async (req, res) => {
       if (idx < 0) return res.end(JSON.stringify(errorRes));
       books = books.filter(b => b.id !== id);
 
-      const resp = { status: 200, statusText: "DELETED" };
+      const resp = { status: StatusCodes.OK, statusText: "DELETED" };
       res.end(JSON.stringify(resp));
 
       fs.writeFile(path.join(__dirname, "data", "db.json"), JSON.stringify(books), err => {

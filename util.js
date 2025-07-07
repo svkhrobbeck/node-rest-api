@@ -10,8 +10,8 @@ const getBodyData = req => {
       req.on("end", () => {
         resolve(body);
       });
-    } catch (error) {
-      reject(error);
+    } catch (err) {
+      reject(err);
     }
   });
 };
